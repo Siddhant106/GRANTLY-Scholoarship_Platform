@@ -1,20 +1,27 @@
-const redis = require('redis');
+const { createClient } = require('redis');
 
-const client = redis.createClient({
-  url: process.env.REDIS_URL 
+// Initialize Redis Client with Cloud Public Endpoint Configuration
+const client = createClient({
+  username: 'default',
+  password: process.env.REDIS_PASSWORD, 
+  socket: {
+    host: 'cast-unruffled-brass-82799.db.redis.io',
+    port: 14605
+  }
 });
 
 client.on('error', (err) => {
-  // Silent or log warning instead of crashing the server
-  console.warn('⚠️ Redis Client Warning: Server is running without Redis caching active.');
+  console.warn('⚠️ Redis Client Error:', err.message);
 });
 
 const connectRedis = async () => {
   try {
-    await client.connect();
-    console.log('🚀 Redis Connected Successfully');
+    if (!client.isOpen) {
+      await client.connect();
+    }
+    console.log('🚀 Redis Connected Successfully to Cloud Endpoint!');
   } catch (error) {
-    console.warn('⚠️ Redis connection failed. Continuing without cache.');
+    console.warn('⚠️ Redis connection failed. Continuing without cache:', error.message);
   }
 };
 
